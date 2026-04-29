@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HomeService } from '../../../services/home'; 
-import { ContenidoGrilla } from '../../contenido-grilla/contenido-grilla'; // Ajusta la ruta a tu grilla compartida
+import { ContenidoGrilla } from '../../contenido-grilla/contenido-grilla';
 
 @Component({
   selector: 'app-la-cac-contigo',
@@ -23,20 +23,21 @@ export class LaCacContigo implements OnInit {
   ngOnInit(): void {
     this.homeService.getHomeContent().subscribe({
       next: (data: any) => {
-        // Filtramos de la sección de podcasts del home
-        const todosLosPodcasts = data.podcasts || [];
-        
-        // Filtramos por el nombre del programa
-        this.episodios = todosLosPodcasts.filter((item: any) => 
-          item.categoria === 'La CAC contigo' || item.proveedor === 'La CAC contigo'
-        );
-        console.log(data);
+        // 1. Tomamos la base de datos
+        const basePodcasts = data.podcasts || [];
 
+        // 2. Filtramos por el campo técnico 'seccion'
+        this.episodios = basePodcasts.filter((item: any) => 
+          item.seccion === 'cac_contigo'
+        );
+
+        // Debug para confirmar
+        console.log('Filtro por sección exitoso. Cantidad:', this.episodios.length);
 
         this.cargando = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al cargar episodios:', err);
         this.cargando = false;
       }

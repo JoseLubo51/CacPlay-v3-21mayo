@@ -28,14 +28,10 @@ export class HomeService {
     return this.http.post(`${this.baseUrl}/${id}/calificar/`, { puntuacion });
   }
 
-  // --- NUEVOS MÉTODOS PARA MI LISTA ---
-
-  // 1. Acción de agregar/quitar (Toggle)
   toggleFavorito(id: number): Observable<any> {
     return this.http.post(`${this.baseUrl}/${id}/toggle-favorito/`, {});
   }
 
-  // 2. Obtener todos los favoritos del usuario
   getMiLista(): Observable<any> {
     return this.http.get(`${this.baseUrl}/mi-lista/`);
   }

@@ -8,14 +8,14 @@
       <p class="text-gray-300 mb-6">{{ hero.descripcion }}</p>
       <div class="flex gap-6">
         <a (click)="goToContent(hero)" class="bg-[#243A85] px-6 py-3 rounded-lg hover:bg-white hover:text-[#243A85] transition cursor-pointer font-bold">
-          ▶ Ver ahora
+          Ver ahora
         </a>
         <button 
         (click)="toggleFavorito(hero)"
         [ngClass]="hero?.es_favorito ? 'bg-[#C4297D] border-[#C4297D] text-white' : 'border-white hover:bg-white hover:text-black'"
         class="border px-6 py-3 rounded-lg transition font-bold flex items-center gap-2">
         <i class="fa-solid" [ngClass]="hero?.es_favorito ? 'fa-check' : 'fa-plus'"></i>
-         {{ hero?.es_favorito ? 'En mi lista' : 'Mi lista' }}
+         {{ hero?.es_favorito ? 'En mi lista' : 'Agregar a mi lista' }}
         </button>
       </div>
     </div>

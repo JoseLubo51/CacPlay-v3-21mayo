@@ -40,9 +40,8 @@ export class Home implements OnInit {
         this.eventos = data.eventos || [];
         this.podcasts = data.podcasts || [];
         
-        // El HomeService ahora tiene getMiLista, podemos llamarlo por separado 
-        // o esperar que el endpoint 'home' lo incluya.
-        this.homeService.getMiLista().subscribe(favs => this.miLista = favs);
+        // Cargamos Mi Lista inicialmente
+        this.actualizarMiLista();
 
         this.cdr.detectChanges();
       },
@@ -50,38 +49,63 @@ export class Home implements OnInit {
     });
   }
 
-  // 💖 AGREGAR/QUITAR DE FAVORITOS (Para el Hero)
-  toggleFavorito(item: any) {
-  if (!item) return;
-  
-  this.homeService.toggleFavorito(item.id).subscribe({
-    next: (res: any) => {
-      item.es_favorito = res.favorito;
-      
-      // ✨ Esto hace que la fila de "Mi Lista" se actualice al instante
-      this.homeService.getMiLista().subscribe(favs => {
-        this.miLista = favs;
+  // Método auxiliar para refrescar solo la fila de favoritos
+  actualizarMiLista() {
+    this.homeService.getMiLista().subscribe({
+      next: (favs: any) => {
+        this.miLista = Array.isArray(favs) ? favs : (favs.resultados || []);
         this.cdr.detectChanges();
-      });
-    }
-  });
-}
+      },
+      error: (err) => console.error('Error al actualizar Mi Lista:', err)
+    });
+  }
 
-  // ⭐ CALIFICAR (Para actualizar votos en tiempo real)
+  /**
+   * 💖 AGREGAR/QUITAR DE FAVORITOS (Para el Hero)
+   */
+  toggleFavorito(item: any) {
+    if (!item || !item.id) return;
+    
+    this.homeService.toggleFavorito(item.id).subscribe({
+      next: (res: any) => {
+        // 1. Actualizamos el estado del botón en el Hero
+        item.es_favorito = res.favorito;
+        
+        // 2. Refrescamos la fila de "Mi Lista" para que el cambio sea instantáneo
+        this.actualizarMiLista();
+        
+        console.log('Estado favorito Hero:', item.es_favorito);
+      },
+      error: (err: any) => {
+        console.error('Error en Hero favorito:', err);
+        // Mensaje unificado para toda la app
+        alert('No fue posible agregar el contenido a Mi Lista');
+      }
+    });
+  }
+
+  /**
+   * ⭐ CALIFICAR (Para actualizar votos en tiempo real)
+   */
   calificar(item: any, puntuacion: number) {
+    if (!item || !item.id) return;
+
     this.homeService.enviarCalificacion(item.id, puntuacion).subscribe({
       next: (res: any) => {
-        // IMPORTANTE: Aquí vinculamos la respuesta de Django con tu objeto Hero
         item.rating_promedio = res.rating_promedio;
         item.total_votos = res.total_votos;
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error al calificar:', err)
+      error: (err) => {
+        console.error('Error al calificar:', err);
+        alert('No fue posible registrar tu calificación');
+      }
     });
   }
 
   goToContent(item: any) {
-    this.router.navigate(['/contenido', item.id]);
+    if (item && item.id) {
+      this.router.navigate(['/contenido', item.id]);
+    }
   }
 }
-

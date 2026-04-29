@@ -1,27 +1,32 @@
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token  # <-- Cambiamos JWT por el Token de tu imagen
 from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Usuario
 
 class EmailTokenObtainSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    # Definimos 'username' como el campo que recibirá el correo desde Angular
+    username = serializers.CharField() 
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        email = data.get("email")
+        username = data.get("username")
         password = data.get("password")
 
-        user = Usuario.objects.filter(email=email).first()
+        # Usamos el método oficial de Django para autenticar
+        # Esto verifica usuario, contraseña y si está activo
+        user = authenticate(username=username, password=password)
 
-        if user is None:
+        if not user:
             raise serializers.ValidationError("Credenciales inválidas")
 
-        if not user.check_password(password):
-            raise serializers.ValidationError("Credenciales inválidas")
+        # AQUÍ ESTÁ LA MAGIA: 
+        # Buscamos el token que ya existe en la base de datos (el de tu imagen)
+        # o creamos uno nuevo si el usuario no tiene.
+        token, created = Token.objects.get_or_create(user=user)
 
-        refresh = RefreshToken.for_user(user)
-
+        # Retornamos la estructura que el frontend necesita
         return {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
+            "token": token.key,  # Este es el valor 'a19415bd...' que viste en el admin
+            "email": user.email,
+            "rol": user.rol
         }

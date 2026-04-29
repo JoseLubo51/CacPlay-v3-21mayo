@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core'; // 👈 Añadimos ChangeDetectorRef
+import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HomeService } from '../../services/home';
@@ -18,35 +18,45 @@ export class ContenidoGrilla implements OnInit {
   constructor(
     private router: Router, 
     private homeService: HomeService,
-    private cdr: ChangeDetectorRef // 👈 Inyectamos el detector de cambios
+    private cdr: ChangeDetectorRef 
   ) {}
 
   ngOnInit(): void {}
 
   goToContent(item: any) {
-    this.router.navigate(['/contenido', item.id]);
+    if (item && item.id) {
+      this.router.navigate(['/contenido', item.id]);
+    }
   }
 
   toggleFavorito(event: Event, item: any) {
-    // 1. Detenemos la propagación para que no se ejecute goToContent()
     event.preventDefault();
     event.stopPropagation();
     
-    if (!item || !item.id) return;
+    // Log de control para ver qué estamos intentando marcar
+    console.log('Intentando toggleFavorito desde GRILLA para item:', item);
+
+    if (!item || !item.id) {
+        console.error('❌ Error en Grilla: El item no tiene ID o es nulo');
+        return;
+    }
 
     this.homeService.toggleFavorito(item.id).subscribe({
       next: (res: any) => {
-        // 2. Actualizamos el valor que viene de Django
-        item.es_favorito = res.favorito;
+        // Usamos la respuesta del servidor o invertimos el estado actual
+        item.es_favorito = res.favorito !== undefined ? res.favorito : !item.es_favorito;
         
-        // 3. 🚩 ¡CLAVE!: Forzamos a Angular a revisar la vista y pintar el botón
         this.cdr.detectChanges();
         
-        console.log('Estado favorito:', item.es_favorito, res.mensaje);
+        // Un mensaje más discreto (puedes quitar el alert después de probar)
+        console.log('✅ Estado actualizado en Grilla:', item.es_favorito);
+        alert(item.es_favorito ? 'Agregado a Mi Lista' : 'Removido de Mi Lista');
       },
-      error: (err) => {
-        console.error('Error al marcar favorito:', err);
+      error: (err: any) => {
+        console.error('🔴 Error real en Grilla:', err);
+        console.log('Status del error:', err.status); // Esto nos dirá si es 401, 403, 500, etc.
+        alert('No fue posible actualizar Mi Lista');
       }
     });
-  }
+}
 }

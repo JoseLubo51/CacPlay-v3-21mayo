@@ -1,7 +1,8 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Contenido, Calificacion, Favorito # Importaciones consolidadas
+from rest_framework.permissions import IsAuthenticated, AllowAny # Añadimos estas
+from .models import Contenido, Calificacion, Favorito
 from .serializers import ContenidoSerializer
 from django.db.models import Q
 
@@ -13,15 +14,14 @@ class ContenidoViewSet(viewsets.ModelViewSet):
     search_fields = ['titulo', 'descripcion', 'proveedor']
     ordering_fields = ['fecha_publicacion', 'creado']
 
-    # --- 1. ENDPOINT PARA HOME (REINSTALADO) ---
-    @action(detail=False, methods=['get'])
+    # --- 1. HOME ---
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def home(self, request):
         hero = Contenido.objects.filter(tipo='video', activo=True).order_by('-creado').first()
         novedades = Contenido.objects.filter(activo=True).order_by('-creado')[:12]
         eventos = Contenido.objects.filter(categoria='eventos', activo=True).order_by('-creado')[:12]
         podcasts = Contenido.objects.filter(tipo='podcast', activo=True).order_by('?')[:12]
 
-        # 🚩 Agregamos context={'request': request} a todos para que se vea el botón de favoritos
         data = {
             "hero": ContenidoSerializer(hero, context={'request': request}).data if hero else None,
             "novedades": ContenidoSerializer(novedades, many=True, context={'request': request}).data,
@@ -30,7 +30,7 @@ class ContenidoViewSet(viewsets.ModelViewSet):
         }
         return Response(data)
 
-    # --- 2. RECUPERAR UN CONTENIDO (DETALLE) ---
+    # --- 2. DETALLE ---
     def retrieve(self, request, *args, **kwargs):
         contenido = self.get_object()
         relacionados = Contenido.objects.filter(
@@ -43,12 +43,11 @@ class ContenidoViewSet(viewsets.ModelViewSet):
         }
         return Response(data)
 
-    # --- 3. ENDPOINT PARA CALIFICAR ---
-    @action(detail=True, methods=['post'])
+    # --- 3. CALIFICAR ---
+    @action(detail=True, methods=['post'], permission_classes=[AllowAny])
     def calificar(self, request, pk=None):
         contenido = self.get_object()
         puntuacion = request.data.get('puntuacion')
-
         try:
             puntuacion = int(puntuacion)
             if not (1 <= puntuacion <= 5): raise ValueError()
@@ -56,31 +55,24 @@ class ContenidoViewSet(viewsets.ModelViewSet):
             return Response({"error": "Puntuación inválida"}, status=400)
 
         Calificacion.objects.create(contenido=contenido, puntuacion=puntuacion)
-
         return Response({
             "mensaje": "Calificación guardada",
             "rating_promedio": contenido.rating_promedio,
             "total_votos": contenido.total_votos
         }, status=status.HTTP_201_CREATED)
 
-    # --- 4. ENDPOINT PARA MI LISTA ---
-    @action(detail=False, methods=['get'], url_path='mi-lista')
+    # --- 4. MI LISTA ---
+    @action(detail=False, methods=['get'], url_path='mi-lista', permission_classes=[IsAuthenticated])
     def mi_lista(self, request):
-        if not request.user.is_authenticated:
-            return Response([], status=status.HTTP_200_OK)
-
+        # Al usar IsAuthenticated, DRF manejará el 401 automáticamente si el token falla
         favoritos_ids = Favorito.objects.filter(user=request.user).values_list('contenido_id', flat=True)
         contenidos = Contenido.objects.filter(id__in=favoritos_ids, activo=True)
-        
         serializer = ContenidoSerializer(contenidos, many=True, context={'request': request})
         return Response(serializer.data)
 
-    # --- 5. ENDPOINT PARA AGREGAR/QUITAR DE MI LISTA ---
-    @action(detail=True, methods=['post'], url_path='toggle-favorito')
+    # --- 5. TOGGLE FAVORITO ---
+    @action(detail=True, methods=['post'], url_path='toggle-favorito', permission_classes=[IsAuthenticated])
     def toggle_favorito(self, request, pk=None):
-        if not request.user.is_authenticated:
-            return Response({"error": "No autorizado"}, status=401)
-
         contenido = self.get_object()
         user = request.user
         favorito_existente = Favorito.objects.filter(user=user, contenido=contenido).first()

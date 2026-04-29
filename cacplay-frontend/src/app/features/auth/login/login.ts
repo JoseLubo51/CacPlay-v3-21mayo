@@ -1,33 +1,31 @@
 import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { AuthService } from '../../../core/services/auth';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-
+import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrls: ['./login.css'],
 })
-export class Login {
-
-  loginForm!: FormGroup;
+export class LoginComponent {
+  loginForm: FormGroup;
   loading = false;
   errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
-  
-
+    private router: Router
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]]
+      password: ['', [Validators.required]],
+      terms: [false],
     });
   }
 
@@ -42,37 +40,16 @@ export class Login {
 
     const { email, password } = this.loginForm.value;
 
-    console.log('FORM VALUE:', this.loginForm.value);
-
-    this.authService.login(email!, password!).subscribe({
-  next: (response) => {
-    
-
-    localStorage.setItem('access', response.access);
-    localStorage.setItem('refresh', response.refresh);
-
-    this.authService.getPerfil().subscribe({
-      next: (perfil) => {
-        console.log('Perfil:', perfil);
-
-        // 👇 navega aquí (más limpio)
+    this.authService.login(email, password).subscribe({
+      next: () => {
         this.router.navigate(['/inicio']);
+        this.loading = false;
       },
-      error: (err) => {
-        console.error('Error perfil:', err);
-        this.router.navigate(['/inicio']); // fallback
+      error: (error: HttpErrorResponse) => {
+        console.error('❌ Error en login:', error);
+        this.errorMessage = 'Credenciales incorrectas';
+        this.loading = false;
       }
     });
-
-    this.loading = false;
-  },
-
-  error: (error) => {
-    console.error('Error login:', error);
-    this.errorMessage = 'Credenciales incorrectas';
-    this.loading = false;
   }
-});
-}
-
 }
