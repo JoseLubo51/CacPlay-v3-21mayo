@@ -65,6 +65,12 @@ export class AuthService {
     return localStorage.getItem(this.USER_ROLE);
   }
 
+  // 🌟 NUEVO MÉTODO: Validación para la sección privada del Layout
+  isVip(): boolean {
+    const rol = this.getRole();
+    return rol === 'vip' || rol === 'superadmin';
+  }
+
   logout(): void {
     localStorage.removeItem(this.ACCESS_KEY);
     localStorage.removeItem(this.REFRESH_KEY);
