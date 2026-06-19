@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { RouterModule, Router } from '@angular/router'; 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
+import { AuthService } from '../../core/services/auth'; // Asegúrate de ajustar la ruta relativa si es necesario
 
 @Component({
   selector: 'app-main-layout',
@@ -19,7 +20,11 @@ export class MainLayout {
   // 2. Variable para capturar la búsqueda
   termino: string = ''; 
 
-  constructor(private router: Router) {} 
+  // Inyectamos el AuthService como public para poder usarlo directamente en el HTML con *ngIf
+  constructor(
+    private router: Router,
+    public authService: AuthService
+  ) {} 
 
   // 3. Control de los desplegables (Perfil/Mobile)
   toggleMenu() {
@@ -40,8 +45,7 @@ export class MainLayout {
 
   // 5. Salida segura
   logout() {
-    localStorage.removeItem('access');
-    localStorage.removeItem('refresh');
+    this.authService.logout();
     window.location.href = '/intro';
   }
 }

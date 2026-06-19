@@ -27,6 +27,9 @@
           </div>
         </li>
         
+        <!-- 🔒 ENLACE DESKTOP: Contenido Privado (Solo VIP, antes de Mi Lista) -->
+        <li *ngIf="authService.isVip()"><a routerLink="/contenido-privado" routerLinkActive="text-[#C4297D]" class="hover:text-[#C4297D] transition flex items-center gap-1">⭐ Exclusivo</a></li>
+
         <li><a routerLink="/mi-lista" routerLinkActive="text-[#C4297D]" class="hover:text-[#C4297D] transition">Mi lista</a></li>
       </ul>
     </div>
@@ -66,47 +69,49 @@
 
       <!-- Botón Hamburguesa (Visible sólo en móviles/tablets < lg) -->
       <button 
-  (click)="menuAbierto = !menuAbierto" 
-  class="lg:hidden text-white hover:text-[#C4297D] text-2xl p-2 focus:outline-none z-50">
-  <i *ngIf="!menuAbierto" class="fa-solid fa-bars"></i>
-  <i *ngIf="menuAbierto" class="fa-solid fa-xmark"></i>
-
-</button>
+        (click)="menuAbierto = !menuAbierto" 
+        class="lg:hidden text-white hover:text-[#C4297D] text-2xl p-2 focus:outline-none z-50">
+        <i *ngIf="!menuAbierto" class="fa-solid fa-bars"></i>
+        <i *ngIf="menuAbierto" class="fa-solid fa-xmark"></i>
+      </button>
       
     </div>
 
     <!-- MENÚ DESPLEGABLE MÓVIL (Interpola con la variable menuAbierto) -->
     <div 
-  [ngClass]="menuAbierto ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'"
-  class="fixed top-[65px] md:top-[85px] left-0 right-0 bottom-0 h-[calc(100vh-65px)] md:h-[calc(100vh-85px)] bg-gray-900 lg:hidden transition-all duration-300 flex flex-col p-6 z-[999] border-t border-gray-800 overflow-y-auto">
+      [ngClass]="menuAbierto ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'"
+      class="fixed top-[65px] md:top-[85px] left-0 right-0 bottom-0 h-[calc(100vh-65px)] md:h-[calc(100vh-85px)] bg-gray-900 lg:hidden transition-all duration-300 flex flex-col p-6 z-[999] border-t border-gray-800 overflow-y-auto">
   
-  <ul class="flex flex-col gap-5 text-xl font-semibold text-gray-300">
-    <li><a routerLink="/inicio" (click)="menuAbierto = false" routerLinkActive="text-[#C4297D]" class="block py-2">Inicio</a></li>
-    <li><a routerLink="/novedades" (click)="menuAbierto = false" routerLinkActive="text-[#C4297D]" class="block py-2">Novedades</a></li>
-    <li><a routerLink="/eventos" (click)="menuAbierto = false" routerLinkActive="text-[#C4297D]" class="block py-2">Eventos</a></li>
-    
-    <!-- Sección Expandida de Podcast en Móvil -->
-    <li class="border-t border-gray-800 pt-3">
-      <span class="text-xs uppercase tracking-wider text-gray-500 font-bold">Podcasts</span>
-      <div class="flex flex-col gap-3 pl-4 mt-2 text-base font-medium">
-        <a routerLink="/podcast/la-cac-contigo" (click)="menuAbierto = false" class="hover:text-[#C4297D]">La CAC Contigo</a>
-        <a routerLink="/podcast/un-dia-con" (click)="menuAbierto = false" class="hover:text-[#C4297D]">Un día con</a>
-      </div>
-    </li>
-    
-    <li class="border-t border-gray-800 pt-3"><a routerLink="/mi-lista" (click)="menuAbierto = false" routerLinkActive="text-[#C4297D]" class="block py-2">Mi lista</a></li>
-  </ul>
+      <ul class="flex flex-col gap-5 text-xl font-semibold text-gray-300">
+        <li><a routerLink="/inicio" (click)="menuAbierto = false" routerLinkActive="text-[#C4297D]" class="block py-2">Inicio</a></li>
+        <li><a routerLink="/novedades" (click)="menuAbierto = false" routerLinkActive="text-[#C4297D]" class="block py-2">Novedades</a></li>
+        <li><a routerLink="/eventos" (click)="menuAbierto = false" routerLinkActive="text-[#C4297D]" class="block py-2">Eventos</a></li>
+        
+        <!-- Sección Expandida de Podcast en Móvil -->
+        <li class="border-t border-gray-800 pt-3">
+          <span class="text-xs uppercase tracking-wider text-gray-500 font-bold">Podcasts</span>
+          <div class="flex flex-col gap-3 pl-4 mt-2 text-base font-medium">
+            <a routerLink="/podcast/la-cac-contigo" (click)="menuAbierto = false" class="hover:text-[#C4297D]">La CAC Contigo</a>
+            <a routerLink="/podcast/un-dia-con" (click)="menuAbierto = false" class="hover:text-[#C4297D]">Un día con</a>
+          </div>
+        </li>
+        
+        <!-- 🔒 ENLACE MÓVIL: Contenido Privado (Solo VIP, antes de Mi Lista) -->
+        <li *ngIf="authService.isVip()" class="border-t border-gray-800 pt-3"><a routerLink="/contenido-privado" (click)="menuAbierto = false" routerLinkActive="text-[#C4297D]" class="block py-2">⭐ Exclusivo</a></li>
 
-  <!-- Botón de Cerrar Sesión en Menú Móvil -->
-  <div class="mt-auto pt-6 border-t border-gray-800">
-    <button 
-      (click)="logout(); menuAbierto = false" 
-      class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-900/20 active:bg-red-900/40 text-red-400 font-medium border border-red-900/30">
-      <i class="fa-solid fa-power-off text-sm"></i>
-      <span>Cerrar sesión</span>
-    </button>
-  </div>
-</div>
+        <li class="border-t border-gray-800 pt-3"><a routerLink="/mi-lista" (click)="menuAbierto = false" routerLinkActive="text-[#C4297D]" class="block py-2">Mi lista</a></li>
+      </ul>
+
+      <!-- Botón de Cerrar Sesión en Menú Móvil -->
+      <div class="mt-auto pt-6 border-t border-gray-800">
+        <button 
+          (click)="logout(); menuAbierto = false" 
+          class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-900/20 active:bg-red-900/40 text-red-400 font-medium border border-red-900/30">
+          <i class="fa-solid fa-power-off text-sm"></i>
+          <span>Cerrar sesión</span>
+        </button>
+      </div>
+    </div>
 
   </nav>
 
@@ -133,6 +138,8 @@
           <li><a routerLink="/inicio" class="hover:text-[#C4297D] transition">Inicio</a></li>
           <li><a routerLink="/novedades" class="hover:text-[#C4297D] transition">Novedades</a></li>
           <li><a routerLink="/eventos" class="hover:text-[#C4297D] transition">Eventos</a></li>
+          <!-- Enlace condicional también en la lista del footer si lo deseas -->
+          <li *ngIf="authService.isVip()"><a routerLink="/contenido-privado" class="hover:text-[#C4297D] transition">⭐ Exclusivo</a></li>
           <li><a routerLink="/mi-lista" class="hover:text-[#C4297D] transition">Mi Lista</a></li>
         </ul>
       </div>
@@ -150,16 +157,16 @@
       <div>
         <h4 class="text-white font-bold mb-4 md:mb-6 text-xs uppercase tracking-widest">Síguenos</h4>
         <div class="flex gap-4">
-  <a href="https://www.facebook.com/Caltocosto" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded bg-gray-900 border border-gray-800 flex items-center justify-center hover:bg-[#243A85] text-gray-400 hover:text-white transition">
-    <i class="fa-brands fa-facebook-f"></i>
-  </a>
-  <a href="https://www.instagram.com/cuentadealtocosto?igshid=MzRlODBiNWFlZA%3D%3D" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded bg-gray-900 border border-gray-800 flex items-center justify-center hover:bg-[#C4297D] text-gray-400 hover:text-white transition">
-    <i class="fa-brands fa-instagram"></i>
-  </a>
-  <a href="https://www.youtube.com/@cuentadealtocosto5011" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded bg-gray-900 border border-gray-800 flex items-center justify-center hover:bg-red-600 text-gray-400 hover:text-white transition">
-    <i class="fa-brands fa-youtube"></i>
-  </a>
-</div>
+          <a href="https://www.facebook.com/Caltocosto" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded bg-gray-900 border border-gray-800 flex items-center justify-center hover:bg-[#243A85] text-gray-400 hover:text-white transition">
+            <i class="fa-brands fa-facebook-f"></i>
+          </a>
+          <a href="https://www.instagram.com/cuentadealtocosto?igshid=MzRlODBiNWFlZA%3D%3D" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded bg-gray-900 border border-gray-800 flex items-center justify-center hover:bg-[#C4297D] text-gray-400 hover:text-white transition">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+          <a href="https://www.youtube.com/@cuentadealtocosto5011" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded bg-gray-900 border border-gray-800 flex items-center justify-center hover:bg-red-600 text-gray-400 hover:text-white transition">
+            <i class="fa-brands fa-youtube"></i>
+          </a>
+        </div>
       </div>
 
     </div>
